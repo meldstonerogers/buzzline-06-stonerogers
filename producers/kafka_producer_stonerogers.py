@@ -1,18 +1,10 @@
-#####################################
 # Import Modules
 #####################################
-
-# Import packages from Python Standard Library
 import os
 import sys
 import time
-import requests 
-
-# Import external packages
 from dotenv import load_dotenv
-load_dotenv()
-
-# Import functions from local modules
+from newsapi import NewsApiClient  # Import the NewsApiClient
 from utils.utils_producer import (
     verify_services,
     create_kafka_producer,
@@ -23,16 +15,12 @@ from utils.utils_logger import logger
 #####################################
 # Load Environment Variables
 #####################################
-
 load_dotenv()
 
-#####################################
-# Getter Functions for .env Variables
-#####################################
-
 # Fetch NewsAPI Key from environment
-API_KEY = os.getenv("NEWSAPI_KEY", "9310f341248d4ad28a3b0bc6391c9fa2")
-BASE_URL = "https://newsapi.org/v2/top-headlines"
+API_KEY = os.getenv("NEWSAPI_KEY")
+logger.info(f"Fetched API Key: {API_KEY}")
+newsapi = NewsApiClient(api_key=API_KEY)  # Initialize NewsApiClient
 
 def get_kafka_topic() -> str:
     """Fetch Kafka topic from environment or use default."""
@@ -42,22 +30,30 @@ def get_kafka_topic() -> str:
 
 def get_message_interval() -> int:
     """Fetch message interval from environment or use default."""
-    interval = int(os.getenv("MESSAGE_INTERVAL_SECONDS", 60))
+    try:
+        interval = int(os.getenv("MESSAGE_INTERVAL_SECONDS", 10))
+    except ValueError:
+        logger.error("Invalid MESSAGE_INTERVAL_SECONDS; using default value of 10 seconds.")
+        interval = 10
+
     logger.info(f"Message interval: {interval} seconds")
     return interval
 
 def fetch_news_data():
-    """Fetch top headlines from NewsAPI."""
-    url = f"{BASE_URL}?country=us&apiKey={API_KEY}"
+    """Fetch top headlines from NewsAPI using the newsapi-python library."""
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        articles = data.get("articles", [])
-        
+        logger.info("Fetching top headlines...")
+        top_headlines = newsapi.get_top_headlines(country='us')
+
+        logger.info(f"API response status: {top_headlines['status']}")  # Log the status
+        articles = top_headlines.get("articles", [])
+        logger.info(f"Number of articles retrieved: {len(articles)}")  # Log number of articles
+
         if not articles:
+            logger.warning("No articles found in response.")
             return None
-        
+
+        # Process and return the articles
         return [
             {
                 "source": article["source"]["name"],
@@ -67,23 +63,33 @@ def fetch_news_data():
             }
             for article in articles if article.get("title") and article.get("url")
         ]
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         logger.error(f"Error fetching news data: {e}")
         return None
 
 #####################################
 # Message Generator
 #####################################
-
 def generate_messages(producer, topic, interval_secs):
     """Fetch news headlines and send messages to Kafka."""
     try:
         while True:
-            news_data = fetch_news_data()
+            logger.info("Fetching news data...")  # Log fetching news data
+            news_data = fetch_news_data()  # Fetch data here
             
-            if news_data:
+            # Check the results of fetching news data
+            if news_data is None:
+                logger.warning("No news articles retrieved from API.")
+            elif not news_data:
+                logger.warning("Empty news articles list retrieved from API.")
+            else:
                 for article in news_data:
-                    message = f"Headline: {article['title']} | Source: {article['source']} | {article['url']}"
+                    message = (
+                        f"Title: {article['title']} | "
+                        f"Source: {article['source']} | "
+                        f"URL: {article['url']} | "
+                        f"Published At: {article['published_at']}"
+                    )
                     logger.info(f"Generated news: {message}")
 
                     # Ensure we are sending a string and encoding it
@@ -93,10 +99,8 @@ def generate_messages(producer, topic, interval_secs):
                     else:
                         logger.error(f"Message is not a string: {message}")
 
-            else:
-                logger.warning("No news articles retrieved.")
-
-            time.sleep(interval_secs)
+            logger.info(f"Waiting for {interval_secs} seconds before the next fetch...")
+            time.sleep(interval_secs)  # Sleep after processing
     except KeyboardInterrupt:
         logger.warning("Producer interrupted by user.")
     except Exception as e:
@@ -109,7 +113,6 @@ def generate_messages(producer, topic, interval_secs):
 #####################################
 # Main Function
 #####################################
-
 def main():
     logger.info("START producer.")
     verify_services()
@@ -141,6 +144,5 @@ def main():
 #####################################
 # Conditional Execution
 #####################################
-
 if __name__ == "__main__":
     main()

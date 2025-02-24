@@ -95,6 +95,10 @@ Use the commands below to activate .venv, and start the producer.
 source .venv/bin/activate
 python3 -m producers.kafka_producer_stonerogers
 ```
+```zsh
+source .venv/bin/activate
+python3 -m producers.producer_stonerogers
+```
 
 ### Consumer (Terminal 4)
 
@@ -106,5 +110,8 @@ Use the commands below to activate .venv, and start the consumer.
 source .venv/bin/activate
 python3 -m consumers.consumer_stonerogers
 ```
-
+```zsh
+source .venv/bin/activate
+python3 -m consumers.consumer_nk_stonerogers
+```
 ---

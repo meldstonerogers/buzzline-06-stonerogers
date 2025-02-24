@@ -1,10 +1,10 @@
-"""
-Logger Setup Script
-File: utils/utils_logger.py
+# Logger Setup Script
+# File: utils/utils_logger.py
 
-This script provides logging functions for the project. 
-Logging is an essential way to track events and issues during execution. 
-This file can be used without modification. 
+"""
+This script provides logging functions for the project.
+Logging is an essential way to track events and issues during execution.
+This file can be used without modification.
 
 Features:
 - Logs information, warnings, and errors to a designated log file.
@@ -17,6 +17,7 @@ Features:
 
 # Imports from Python Standard Library
 import pathlib
+import os
 
 # Imports from external packages
 from loguru import logger
@@ -27,9 +28,6 @@ CURRENT_SCRIPT = pathlib.Path(__file__).stem
 # Set directory where logs will be stored
 LOG_FOLDER: pathlib.Path = pathlib.Path("logs")
 
-# Set the name of the log file
-LOG_FILE: pathlib.Path = LOG_FOLDER.joinpath("project_log.log")
-
 # Ensure the log folder exists or create it
 try:
     LOG_FOLDER.mkdir(exist_ok=True)
@@ -37,18 +35,17 @@ try:
 except Exception as e:
     logger.error(f"Error creating log folder: {e}")
 
-# Configure Loguru to write to the log file
-try:
-    logger.add(LOG_FILE, level="INFO")
-    logger.info(f"Logging to file: {LOG_FILE}")
-except Exception as e:
-    logger.error(f"Error configuring logger to write to file: {e}")
+# Set the name of the log file
+LOG_FILE: pathlib.Path = LOG_FOLDER.joinpath("project_log.log")
 
+# Set the log level from environment variable or default to INFO
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+logger.add(LOG_FILE, level=LOG_LEVEL)
+logger.info(f"Logging level set to: {LOG_LEVEL}")
 
 def get_log_file_path() -> pathlib.Path:
     """Return the path to the log file."""
     return LOG_FILE
-
 
 def log_example() -> None:
     """Example logging function to demonstrate logging behavior."""
@@ -59,7 +56,6 @@ def log_example() -> None:
     except Exception as e:
         logger.error(f"An error occurred during logging: {e}")
 
-
 def main() -> None:
     """Main function to execute logger setup and demonstrate its usage."""
     logger.info(f"STARTING {CURRENT_SCRIPT}.py")
@@ -69,7 +65,6 @@ def main() -> None:
 
     logger.info(f"View the log output at {LOG_FILE}")
     logger.info(f"EXITING {CURRENT_SCRIPT}.py.")
-
 
 # Conditional execution block that calls main() only when this file is executed directly
 if __name__ == "__main__":

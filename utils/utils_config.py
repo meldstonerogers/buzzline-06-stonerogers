@@ -53,23 +53,27 @@ def get_kafka_broker_address() -> str:
 
 
 def get_kafka_topic() -> str:
-    """Fetch BUZZ_TOPIC from environment or use default."""
-    topic = os.getenv("BUZZ_TOPIC", "buzzline")
-    logger.info(f"BUZZ_TOPIC: {topic}")
+    """Fetch the correct Kafka topic from environment variables or use default."""
+    topic = os.getenv("KAFKA_TOPIC", "news_topic")  # Set "news_topic" as the default
+    logger.info(f"KAFKA_TOPIC: {topic}")
     return topic
 
 
 def get_message_interval_seconds_as_int() -> int:
     """Fetch MESSAGE_INTERVAL_SECONDS from environment or use default."""
-    interval = int(os.getenv("MESSAGE_INTERVAL_SECONDS", 5))
-    logger.info(f"MESSAGE_INTERVAL_SECONDS: {interval}")
-    return interval
+    try:
+        interval = int(os.getenv("MESSAGE_INTERVAL_SECONDS", 5))
+        logger.info(f"MESSAGE_INTERVAL_SECONDS: {interval}")
+        return interval
+    except ValueError:
+        logger.error("Invalid value for MESSAGE_INTERVAL_SECONDS; using default (5).")
+        return 5
 
 
 def get_kafka_consumer_group_id() -> str:
-    """Fetch BUZZ_CONSUMER_GROUP_ID from environment or use default."""
-    group_id = os.getenv("BUZZ_CONSUMER_GROUP_ID", "buzz_group")
-    logger.info(f"BUZZ_CONSUMER_GROUP_ID: {group_id}")
+    """Fetch NEWS_CONSUMER_GROUP_ID from environment or use default."""
+    group_id = os.getenv("NEWS_CONSUMER_GROUP_ID", "news_group")
+    logger.info(f"NEWS_CONSUMER_GROUP_ID: {group_id}")
     return group_id
 
 
@@ -79,22 +83,6 @@ def get_base_data_path() -> pathlib.Path:
     data_dir = project_root / os.getenv("BASE_DATA_DIR", "data")
     logger.info(f"BASE_DATA_DIR: {data_dir}")
     return data_dir
-
-
-def get_live_data_path() -> pathlib.Path:
-    """Fetch LIVE_DATA_FILE_NAME from environment or use default."""
-    live_data_path = get_base_data_path() / os.getenv(
-        "LIVE_DATA_FILE_NAME", "project_live.json"
-    )
-    logger.info(f"LIVE_DATA_PATH: {live_data_path}")
-    return live_data_path
-
-
-def get_sqlite_path() -> pathlib.Path:
-    """Fetch SQLITE_DB_FILE_NAME from environment or use default."""
-    sqlite_path = get_base_data_path() / os.getenv("SQLITE_DB_FILE_NAME", "buzz.sqlite")
-    logger.info(f"SQLITE_PATH: {sqlite_path}")
-    return sqlite_path
 
 
 def get_database_type() -> str:
@@ -113,9 +101,14 @@ def get_postgres_host() -> str:
 
 def get_postgres_port() -> int:
     """Fetch POSTGRES_PORT from environment or use default."""
-    port = int(os.getenv("POSTGRES_PORT", 5432))
-    logger.info(f"POSTGRES_PORT: {port}")
-    return port
+    try:
+        port = int(os.getenv("POSTGRES_PORT", 5432))
+        logger.info(f"POSTGRES_PORT: {port}")
+        return port
+    except ValueError:
+        logger.error("Invalid value for POSTGRES_PORT; using default (5432).")
+        return 5432
+
 
 
 def get_postgres_db() -> str:
@@ -139,38 +132,6 @@ def get_postgres_password() -> str:
     return password
 
 
-def get_mongodb_uri() -> str:
-    """Fetch MONGODB_URI from environment or use default."""
-    uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
-    logger.info(f"MONGODB_URI: {uri}")
-    return uri
-
-
-def get_mongodb_db() -> str:
-    """Fetch MONGODB_DB from environment or use default."""
-    db = os.getenv("MONGODB_DB", "mongo_buzz_database")
-    logger.info(f"MONGODB_DB: {db}")
-    return db
-
-
-def get_mongodb_collection() -> str:
-    """Fetch MONGODB_COLLECTION from environment or use default."""
-    collection = os.getenv("MONGODB_COLLECTION", "mongo_buzz_collection")
-    logger.info(f"MONGODB_COLLECTION: {collection}")
-    return collection
-
-def get_mongo_uri() -> str:
-    """
-    Get MongoDB URI from environment variable.
-    Returns:
-        str: MongoDB URI.
-    """
-    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")  # Default to localhost if not set
-    if not mongo_uri:
-        raise ValueError("MONGO_URI environment variable not set.")
-    return mongo_uri
-
-
 #####################################
 # Conditional Execution
 #####################################
@@ -185,17 +146,12 @@ if __name__ == "__main__":
         get_message_interval_seconds_as_int()
         get_kafka_consumer_group_id()
         get_base_data_path()
-        get_live_data_path()
-        get_sqlite_path()
         get_database_type()
         get_postgres_host()
         get_postgres_port()
         get_postgres_db()
         get_postgres_user()
         get_postgres_password()
-        get_mongodb_uri()
-        get_mongodb_db()
-        get_mongodb_collection()
         logger.info("SUCCESS: Configuration function tests complete.")
 
     except Exception as e:

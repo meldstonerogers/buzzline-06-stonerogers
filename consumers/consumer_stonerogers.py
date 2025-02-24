@@ -48,7 +48,6 @@ def init_db(db_host: str, db_name: str, db_user: str, db_password: str):
         logger.error(f"ERROR: Failed to initialize PostgreSQL: {e}")
         sys.exit(1)
 
-
 def insert_message(message: dict, db_host: str, db_name: str, db_user: str, db_password: str):
     """
     Insert a processed news article into the PostgreSQL database.
@@ -81,7 +80,6 @@ def insert_message(message: dict, db_host: str, db_name: str, db_user: str, db_p
     except Exception as e:
         logger.error(f"ERROR: Failed to insert message into PostgreSQL: {e}")
 
-
 #####################################
 # Message Processing
 #####################################
@@ -102,7 +100,6 @@ def process_message(message: dict) -> dict:
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         return None
-
 
 #####################################
 # Kafka Consumer
@@ -140,10 +137,11 @@ def consume_messages_from_kafka(
             if processed_message:
                 insert_message(processed_message, db_host, db_name, db_user, db_password)
             time.sleep(interval_secs)
+    except KeyboardInterrupt:
+        logger.warning("Consumer interrupted by user.")
     except Exception as e:
         logger.error(f"ERROR: Could not consume messages from Kafka: {e}")
         raise
-
 
 #####################################
 # Main Function
@@ -180,13 +178,10 @@ def main():
         consume_messages_from_kafka(
             topic, kafka_url, group_id, db_host, db_name, db_user, db_password, interval_secs
         )
-    except KeyboardInterrupt:
-        logger.warning("Consumer interrupted by user.")
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
     finally:
         logger.info("Consumer shutting down.")
-
 
 #####################################
 # Conditional Execution
