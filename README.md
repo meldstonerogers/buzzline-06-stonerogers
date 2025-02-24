@@ -10,6 +10,7 @@ Ensure both PostgreSQL and pgAdmin4 are installed on your machine before recreat
 
 This project references Dr. Case's project repository found [here](https://github.com/denisecase/buzzline-05-case). Much of the detailed instructions in this README.md were borrowed from Dr. Case's project specifications and updated for my machine.
 Commands were used on a Mac machine running zsh. 
+
 ---
 ## Task 1. Use Tools from Module 1 and 2
 
@@ -85,7 +86,7 @@ python3 -m consumers.consumer_nk_stonerogers
 
 ## Task 5. Visualizations
 If all ran according to plan, you should now visualize something similar to the image below.
-(![Figure 1](image.png))
+![Figure 1](image.png)
 
 The majority of sentiments of titles of top news articles are neutral, with the non-neutral titles being more positive than negative. Additional visualizations could be created by modifying the consumer code to produce additional charts with matlotlib. PgAdmin4 does not have a visualization option within the application, but can be helpful for viewing and adjusting data. 
 
