@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import psycopg2
+import matplotlib.pyplot as plt  # Import Matplotlib for visualization
 from utils.utils_logger import logger
 from textblob import TextBlob  # For sentiment analysis
 import utils.utils_config as config
@@ -41,8 +42,20 @@ def fetch_news_articles(conn):
 def analyze_sentiment(title: str) -> str:
     """Analyze sentiment of the given title and return the sentiment polarity."""
     analysis = TextBlob(title)
-    # Polarity ranges from -1 (negative) to 1 (positive)
-    return analysis.sentiment.polarity
+    return analysis.sentiment.polarity  # Polarity ranges from -1 (negative) to 1 (positive)
+
+def plot_sentiment_distribution(sentiment_counts):
+    """Plot a bar chart of sentiment distribution."""
+    labels = ['Negative', 'Neutral', 'Positive']
+    counts = [sentiment_counts['negative'], sentiment_counts['neutral'], sentiment_counts['positive']]
+
+    plt.bar(labels, counts, color=['red', 'gray', 'green'])
+    plt.title('Sentiment Analysis of News Articles')
+    plt.xlabel('Sentiment')
+    plt.ylabel('Number of Articles')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
 
 def main():
     logger.info("START consumer.")
@@ -58,12 +71,23 @@ def main():
     try:
         while True:
             articles = fetch_news_articles(conn)
+            sentiment_counts = {'negative': 0, 'neutral': 0, 'positive': 0}
+
             if not articles:
                 logger.info("No articles found in the database.")
             else:
                 for article in articles:
                     source, title, url, published_at = article
                     sentiment_score = analyze_sentiment(title)
+
+                    # Classify sentiment
+                    if sentiment_score < -0.1:
+                        sentiment_counts['negative'] += 1
+                    elif sentiment_score > 0.1:
+                        sentiment_counts['positive'] += 1
+                    else:
+                        sentiment_counts['neutral'] += 1
+
                     logger.info(f"Title: {title} | Source: {source} | URL: {url} | Published At: {published_at} | Sentiment Score: {sentiment_score}")
                     
                     # Update the sentiment score in the database
@@ -79,6 +103,9 @@ def main():
                             logger.info(f"Updated sentiment score for article: {title}")
                     except Exception as e:
                         logger.error(f"ERROR: Failed to update sentiment score for {title}: {e}")
+
+                # Plot sentiment distribution
+                plot_sentiment_distribution(sentiment_counts)
 
             # Sleep for a defined interval before fetching new articles
             time.sleep(10)  # Adjust the interval as needed
