@@ -170,62 +170,32 @@ def create_kafka_topic(topic_name, group_id=None):
 # Clear a Kafka Topic
 #####################################
 
+import time
 
-def clear_kafka_topic(topic_name, group_id):
-    """
-    Consume and discard all messages in the Kafka topic to clear it.
-
-    Args:
-        topic_name (str): Name of the Kafka topic.
-        group_id (str): Consumer group ID.
-    """
+def clear_kafka_topic(topic_name, group_id, timeout=10):
+    """Consume and discard all messages in the Kafka topic to clear it."""
     kafka_broker = get_kafka_broker_address()
-    admin_client = KafkaAdminClient(bootstrap_servers=kafka_broker)
+    consumer = KafkaConsumer(
+        topic_name,
+        group_id=group_id,
+        bootstrap_servers=kafka_broker,
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
+    )
 
+    start_time = time.time()
     try:
-        # Fetch the current retention period
-        config_resource = ConfigResource(ConfigResourceType.TOPIC, topic_name)
-        configs = admin_client.describe_configs([config_resource])
-        original_retention = configs[config_resource].get(
-            "retention.ms", "604800000"
-        )  # Default to 7 days
-        logger.info(
-            f"Original retention.ms for topic '{topic_name}': {original_retention}"
-        )
-
-        # Temporarily set retention to 1ms
-        admin_client.alter_configs({config_resource: {"retention.ms": "1"}})
-        logger.info(f"Retention.ms temporarily set to 1ms for topic '{topic_name}'.")
-
-        # Wait a moment for Kafka to apply retention and delete old data
-        time.sleep(2)
-
-        # Clear remaining messages by consuming and discarding them
         logger.info(f"Clearing topic '{topic_name}' by consuming all messages...")
-        consumer = KafkaConsumer(
-            topic_name,
-            group_id=group_id,
-            bootstrap_servers=kafka_broker,
-            auto_offset_reset="earliest",
-            enable_auto_commit=True,
-        )
         for message in consumer:
             logger.debug(f"Clearing message: {message.value}")
-        consumer.close()
+            if time.time() - start_time > timeout:
+                logger.warning(f"Timeout reached while clearing topic '{topic_name}'.")
+                break
         logger.info(f"All messages cleared from topic '{topic_name}'.")
-
-        # Restore the original retention period
-        admin_client.alter_configs(
-            {config_resource: {"retention.ms": original_retention}}
-        )
-        logger.info(
-            f"Retention.ms restored to {original_retention} for topic '{topic_name}'."
-        )
-
     except Exception as e:
-        logger.error(f"Error managing retention for topic '{topic_name}': {e}")
+        logger.error(f"Error while clearing topic '{topic_name}': {e}")
     finally:
-        admin_client.close()
+        consumer.close()
 
 
 #####################################

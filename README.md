@@ -4,9 +4,8 @@ Melissa Stone Rogers, [GitHub](https://github.com/meldstonerogers/buzzline-06-st
 
 ## Introduction
 
-This is a professional project incorporating a relational data store. This project uses Apache Kafka to create uniquie JSON producers and consumers to simulate streaming data. Python Version 3.11.6 was used, as well as Git for version control. 
-This project was forked from Dr. Case's project repository found [here](https://github.com/denisecase/buzzline-05-case). Much of the detailed instructions in this README.md were borrowed from Dr. Case's project specifications, and updated for my machine.
-The sample project uses SQLite and was modified to use MongoDB.
+This is a professional project creating a custom producer and consumer file. The producer fetches information from [NewsAPI](https://newsapi.org/). The consumer reads this data to an [PostgreSQL](https://www.postgresql.org/download/) database. [pdAdmin 4](https://www.pgadmin.org/download/) was used to view and analyze data.  Ensure both PostgreSQL and pgAdmin4 are installed on your machine before recreating this project. Python Version 3.11.6 was used, as well as Git for version control. 
+This project references Dr. Case's project repository found [here](https://github.com/denisecase/buzzline-05-case). Much of the detailed instructions in this README.md were borrowed from Dr. Case's project specifications, and updated for my machine.
 Commands were used on a Mac machine running zsh. 
 
 ## Task 1. Use Tools from Module 1 and 2
@@ -75,5 +74,37 @@ chmod +x kafka-server-start.sh
 bin/kafka-server-start.sh config/server.properties
 ```
 Keep this terminal open while working with Kafka. 
+
+---
+## Task 5. Start a New Streaming Application
+
+This will take two more terminals:
+
+1. One to run the producer which writes messages. 
+2. Another to run the consumer which reads messages, processes them, and writes them to a data store. 
+
+### Producer (Terminal 3) 
+
+Start the producer to generate the messages. 
+For configuration details, see the .env file. 
+
+In VS Code, open a NEW terminal.
+Use the commands below to activate .venv, and start the producer. 
+
+```zsh
+source .venv/bin/activate
+python3 -m producers.kafka_producer_stonerogers
+```
+
+### Consumer (Terminal 4)
+
+Start an associated consumer. 
+In VS Code, open a NEW terminal in your root project folder. 
+Use the commands below to activate .venv, and start the consumer. 
+
+```zsh
+source .venv/bin/activate
+python3 -m consumers.consumer_stonerogers
+```
 
 ---

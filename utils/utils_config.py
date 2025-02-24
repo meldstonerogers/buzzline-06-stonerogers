@@ -170,6 +170,7 @@ def get_mongo_uri() -> str:
         raise ValueError("MONGO_URI environment variable not set.")
     return mongo_uri
 
+
 #####################################
 # Conditional Execution
 #####################################
