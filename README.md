@@ -26,9 +26,7 @@ Follow the instructions in [FORK-THIS-REPO.md](https://github.com/denisecase/buz
 ## Task 3. Manage Local Project Virtual Environment
 
 Follow the instructions in [MANAGE-VENV.md](https://github.com/denisecase/buzzline-01-case/blob/main/docs/MANAGE-VENV.md) to:
-1. Create your .venv
-2. Activate .venv
-3. Install the required dependencies using requirements.txt.
+1. Create your .venv and activate it
 
 Mac/Linux:
 
@@ -43,6 +41,8 @@ Windows:
 py -3.11 -m venv .venv
 .venv\Scripts\activate
 ```
+
+2. Install the required dependencies using requirements.txt.
 
 Mac/Linux:
 
