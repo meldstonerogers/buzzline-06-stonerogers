@@ -21,27 +21,53 @@ Python 3.11 is required.
 
 Once the tools are installed, copy/fork this project into your GitHub account and create your own version of this project to run and experiment with.
 Name it `buzzline-06-yourname` where yourname is something unique to you.
-Follow the instructions in [FORK-THIS-REPO.md](https://github.com/denisecase/buzzline-01-case/docs/FORK-THIS-REPO.md).
+Follow the instructions in [FORK-THIS-REPO.md](https://github.com/denisecase/buzzline-01-case/blob/main/docs/FORK-THIS-REPO.md).
 
 ## Task 3. Manage Local Project Virtual Environment
 
-Follow the instructions in [MANAGE-VENV.md](https://github.com/denisecase/buzzline-01-case/docs/MANAGE-VENV.md) to:
+Follow the instructions in [MANAGE-VENV.md](https://github.com/denisecase/buzzline-01-case/blob/main/docs/MANAGE-VENV.md) to:
 1. Create your .venv
 2. Activate .venv
 3. Install the required dependencies using requirements.txt.
+
+Mac/Linux:
 
 ```zsh
 python3.11 -m venv .venv
 source .venv/bin/activate
 ```
+
+Windows: 
+
+```shell
+py -3.11 -m venv .venv
+.venv\Scripts\activate
+```
+
+Mac/Linux:
+
 ```zsh
 python -m pip install --upgrade pip setuptools wheel
 python -m pip install --upgrade -r requirements.txt
+```
 
+Windows: 
+
+```shell
+py -m pip install --upgrade pip setuptools wheel
+py -m pip install --upgrade -r requirements.txt
 ```
 
 Remember, each time a new terminal is opened, activate the .venv. 
+
+Mac/Linux:
 ```zsh
+source .venv/bin/activate
+```
+
+Windows:
+
+```shell
 source .venv/bin/activate
 ```
 
@@ -68,9 +94,18 @@ For configuration details, see the .env file.
 In VS Code, open a NEW terminal.
 Use the commands below to activate .venv, and start the producer. 
 
+Mac/Linux:
+
 ```zsh
 source .venv/bin/activate
 python3 -m producers.producer_stonerogers
+```
+
+Windows:
+
+```shell
+.venv\Scripts\activate
+py -m producers.producer_stonerogers
 ```
 
 ### Consumer (Terminal 2)
@@ -79,9 +114,18 @@ Start an associated consumer.
 In VS Code, open a NEW terminal in your root project folder. 
 Use the commands below to activate .venv, and start the consumer. 
 
+Mac/Linux:
+
 ```zsh
 source .venv/bin/activate
 python3 -m consumers.consumer_nk_stonerogers
+```
+
+Windows:
+
+```shell
+.venv\Scripts\activate
+py -m consumers.consumer_nk_stonerogers
 ```
 
 ## Task 5. Visualizations
